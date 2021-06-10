@@ -5,9 +5,9 @@ import numpy as np
 from sklearn import datasets, model_selection
 
 class Perceptron:
-    def __init__(self, x_dim, rho=0.005):
-        np.random.seed(seed=32)
-        self.w = np.random.randn(x_dim + 1)
+    def __init__(self, x_dim, rho=0.0001):
+        np.random.seed(seed=1)
+        self.w = np.array([0.5,0.5, 0.5]) # np.random.randn(x_dim + 1)
         self.rho = rho
 
     def train(self, data, label, count=1):
@@ -19,23 +19,33 @@ class Perceptron:
 
             print("カウント", count, "巡目", "w=", self.w)
             count += 1
-            # if count % 50 == 0:
-            #     self.rho = self.rho / 2
+            # if count % 2 == 0:
+            #     self.rho = self.rho * 1.9
 
             for x, y in zip(list(data), list(label)):
-                pred = self.predict(x)
+                pred, value = self.predict(x)
                 if pred != y:
                     classified = False
 
                     x = np.array(list(x) + [1])
+                    """
+                    元のコード
                     self.w = self.w - pred * self.rho * x
+                    以下は閾値からの誤差をpredの値に追加してずれた数値を重みとして扱っている。
+                    """
+                    self.w = self.w - (pred + value) * self.rho * x
             if classified:
                 break
     
     # 重みと入力の積が正であれば1, 負である場合は-1
     def predict(self, x):
         x = np.array(list(x) + [1])
-        return 1 if np.dot(self.w, x) > 0 else -1
+        # print(np.dot(self.w, x))
+        if np.dot(self.w, x) > 0:
+            # print(np.dot(self.w, x))
+            return 1, np.dot(self.w, x)
+        else:
+            return -1, np.dot(self.w, x)
 
 if __name__ == '__main__':
     dataset = datasets.load_iris()
